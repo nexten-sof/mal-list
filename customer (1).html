@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mal List — পণ্য ক্যাটালগ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --mint: #e4f7ef; --mint-mid: #c3edd8; --mint-deep: #9edbbf;
+    --teal: #0d6b51; --teal-light: #1a9e75; --teal-pale: #e8f7f1;
+    --gold: #b87516; --gold-light: #f5c261;
+    --cream: #fafaf7; --white: #ffffff; --text: #111111;
+    --text-mid: #444444; --text-muted: #888888;
+    --border: rgba(0,0,0,0.09); --border-mid: rgba(0,0,0,0.15);
+    --shadow-sm: 0 2px 12px rgba(0,0,0,0.07); --shadow-md: 0 8px 32px rgba(0,0,0,0.12);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.18); --radius: 12px; --radius-sm: 7px;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--mint); color: var(--text); min-height: 100vh; }
+  .site-header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow-sm); }
+  .header-inner { max-width: 1280px; margin: auto; padding: 0 32px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .logo { display: flex; align-items: baseline; gap: 10px; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+  .logo-dot { color: var(--teal); }
+  .logo-tag { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+  .stat-pill { background: var(--mint); border: 1px solid var(--mint-deep); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--teal); }
+  .hero-bar { background: linear-gradient(135deg, #0d6b51 0%, #1a9e75 100%); padding: 40px 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero-bar::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: #fff; letter-spacing: -1px; position: relative; }
+  .hero-sub { font-size: 15px; color: rgba(255,255,255,0.75); margin-top: 8px; position: relative; }
+  .filter-section { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .filter-inner { max-width: 1280px; margin: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 0; }
+  .search-wrap { position: relative; }
+  .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+  .search-input { padding: 9px 14px 9px 38px; border: 1.5px solid var(--border-mid); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; width: 230px; background: var(--cream); color: var(--text); transition: border-color 0.15s; }
+  .search-input:focus { border-color: var(--teal); background: #fff; }
+  .filter-sep { width: 1px; height: 28px; background: var(--border-mid); margin: 0 4px; }
+  .filter-btn { border: 1.5px solid var(--border-mid); background: var(--cream); border-radius: 7px; padding: 7px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text-mid); transition: all 0.15s; text-transform: uppercase; }
+  .filter-btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-pale); }
+  .filter-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .filter-btn.active-gold { background: var(--gold); color: #fff; border-color: var(--gold); }
+  .sort-select { border: 1.5px solid var(--border-mid); border-radius: 7px; padding: 7px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text-mid); background: var(--cream); outline: none; cursor: pointer; margin-left: auto; }
+  .grid-section { max-width: 1280px; margin: auto; padding: 32px; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+  .product-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.4s ease both; }
+  .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px);} to { opacity:1; transform:translateY(0);} }
+  .card-thumb { width: 100%; aspect-ratio: 1/1; background: var(--mint); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+  .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card-thumb .thumb-placeholder { font-size: 52px; opacity: 0.4; }
+  .card-badge { position: absolute; top: 10px; left: 10px; font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
+  .badge-home { background: var(--teal); color: #fff; }
+  .badge-away { background: var(--gold); color: #fff; }
+  .card-body { padding: 14px 16px 16px; }
+  .card-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .card-sell { font-size: 15px; font-weight: 700; color: var(--teal); margin-top: 8px; }
+  .card-sell-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .empty-state { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--text-muted); font-size: 15px; }
+  .empty-state .empty-icon { font-size: 56px; margin-bottom: 14px; opacity: 0.4; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+  .overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: var(--shadow-lg); animation: modalIn 0.25s ease; }
+  @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px);} to { opacity:1; transform:scale(1) translateY(0);} }
+  .modal-close { position: absolute; top: 16px; right: 16px; z-index: 10; background: rgba(255,255,255,0.9); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: background 0.15s; }
+  .modal-close:hover { background: #fff; color: var(--text); }
+  .modal-hero { width: 100%; height: 280px; background: var(--mint); display: flex; align-items: center; justify-content: center; font-size: 80px; overflow: hidden; }
+  .modal-hero img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-body { padding: 24px 28px 28px; }
+  .modal-name { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 8px; }
+  .modal-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; border-radius: 5px; margin-bottom: 16px; color: #fff; }
+  .modal-price-box { background: var(--teal-pale); border: 1.5px solid var(--mint-deep); border-radius: var(--radius-sm); padding: 18px 20px; margin-top: 12px; text-align: center; }
+  .modal-price-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); font-weight: 600; margin-bottom: 6px; }
+  .modal-price-value { font-size: 28px; font-weight: 700; color: var(--teal); font-family: 'Playfair Display', serif; }
+  .modal-desc { background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 16px; font-size: 14px; color: var(--text-mid); line-height: 1.65; }
+  .whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 16px; background: #25d366; color: #fff; border: none; border-radius: var(--radius-sm); padding: 13px 20px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; text-decoration: none; }
+  .whatsapp-btn:hover { background: #1ebe5b; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--teal); font-weight: 600; }
+  .loading-overlay.hidden { display: none; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--mint-deep); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .footer { text-align: center; padding: 32px; color: var(--text-muted); font-size: 12px; }
+  @media (max-width: 600px) {
+    .header-inner { padding: 0 16px; } .hero-bar { padding: 28px 16px; } .hero-title { font-size: 30px; }
+    .filter-section { padding: 0 16px; } .grid-section { padding: 16px; }
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div> লোড হচ্ছে...
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-text">Mal<span class="logo-dot">.</span>List</span>
+      <span class="logo-tag">পণ্য ক্যাটালগ</span>
+    </div>
+    <span class="stat-pill" id="headerStatPill">মোট পণ্য: ০</span>
+  </div>
+</header>
+
+<div class="hero-bar">
+  <div class="hero-title">আমাদের পণ্য সমূহ</div>
+  <div class="hero-sub">সকল পণ্যের মূল্য ও বিবরণ দেখুন</div>
+</div>
+
+<div class="filter-section">
+  <div class="filter-inner">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" type="text" placeholder="পণ্য খুঁজুন..." id="searchInput" oninput="renderAll()" />
+    </div>
+    <div class="filter-sep"></div>
+    <button class="filter-btn active" id="fAll" onclick="setFilter('all')">সব</button>
+    <button class="filter-btn" id="fHome" onclick="setFilter('home')">🏭 HOME</button>
+    <button class="filter-btn" id="fAway" onclick="setFilter('away')">🚚 AWAY</button>
+    <select class="sort-select" id="sortSelect" onchange="renderAll()">
+      <option value="default">ক্রম: সর্বশেষ</option>
+      <option value="nameAsc">নাম A-Z</option>
+    </select>
+  </div>
+</div>
+
+<div class="grid-section">
+  <div class="product-grid" id="productGrid"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDetail()">×</button>
+    <div class="modal-hero" id="dHero"></div>
+    <div class="modal-body">
+      <span class="modal-badge" id="dBadge"></span>
+      <div class="modal-name" id="dName"></div>
+      <div class="modal-price-box">
+        <div class="modal-price-label">বিক্রয় মূল্য</div>
+        <div class="modal-price-value" id="dSell"></div>
+      </div>
+      <div class="modal-desc" id="dDesc"></div>
+      <a class="whatsapp-btn" id="waBtn" href="#" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        অর্ডার করুন (WhatsApp)
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="footer">© Mal List — সকল পণ্য সংরক্ষিত</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// আপনার WhatsApp নম্বর এখানে দিন (880 দিয়ে শুরু)
+const WHATSAPP_NUMBER = "880XXXXXXXXXX";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBqX_oJuHu6SjOc6YHv0j-EJc5urQ4TPCc",
+  authDomain: "mal-list.firebaseapp.com",
+  projectId: "mal-list",
+  storageBucket: "mal-list.firebasestorage.app",
+  messagingSenderId: "129353002960",
+  appId: "1:129353002960:web:133455f0091e0404a713d5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const colRef = collection(db, "products");
+
+let products = [];
+let currentFilter = 'all';
+
+window.setFilter = function(f){
+  currentFilter=f;
+  ['fAll','fHome','fAway'].forEach(id=>document.getElementById(id).className='filter-btn');
+  const map={all:'fAll',home:'fHome',away:'fAway'};
+  document.getElementById(map[f]).className='filter-btn active'+(f==='away'?' active-gold':'');
+  renderAll();
+};
+
+window.renderAll = function(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const sort=document.getElementById('sortSelect').value;
+  let filtered=products.filter(p=>{
+    if(currentFilter==='home'&&p.type!=='home') return false;
+    if(currentFilter==='away'&&p.type!=='away') return false;
+    if(q&&!p.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if(sort==='nameAsc') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  else filtered=filtered.slice().reverse();
+  document.getElementById('headerStatPill').textContent='মোট পণ্য: '+products.length;
+  const grid=document.getElementById('productGrid');
+  if(!filtered.length){ grid.innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><div>কোনো পণ্য পাওয়া যায়নি</div></div>'; return; }
+  grid.innerHTML=filtered.map((p,i)=>`
+    <div class="product-card" style="animation-delay:${i*0.04}s;" onclick="openDetail('${p.docId}')">
+      <div class="card-thumb">
+        ${p.img?`<img src="${p.img}" />`:'<span class="thumb-placeholder">📦</span>'}
+        <span class="card-badge badge-${p.type}">${p.type.toUpperCase()}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        ${p.sell?`<div class="card-sell">${p.sell}</div><div class="card-sell-label">বিক্রয় মূল্য</div>`:'<div class="card-sell-label" style="margin-top:8px;">মূল্য জানতে যোগাযোগ করুন</div>'}
+      </div>
+    </div>`).join('');
+};
+
+window.openDetail = function(docId){
+  const p=products.find(x=>x.docId===docId); if(!p) return;
+  document.getElementById('dHero').innerHTML=p.img?`<img src="${p.img}" />`:'📦';
+  document.getElementById('dName').textContent=p.name;
+  const badge=document.getElementById('dBadge');
+  badge.textContent=p.type.toUpperCase()+(p.type==='home'?' — নিজস্ব কারখানা':' — আমদানি');
+  badge.className='modal-badge '+(p.type==='home'?'badge-home':'badge-away');
+  document.getElementById('dSell').textContent=p.sell||'যোগাযোগ করুন';
+  document.getElementById('dDesc').textContent=p.desc||'কোনো বিবরণ নেই।';
+  const msg=encodeURIComponent(`আমি "${p.name}" পণ্যটি সম্পর্কে জানতে চাই। বিক্রয় মূল্য: ${p.sell}`);
+  document.getElementById('waBtn').href=`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+  document.getElementById('detailOverlay').classList.add('open');
+};
+
+window.closeDetail = ()=>document.getElementById('detailOverlay').classList.remove('open');
+
+// Real-time listener — admin যোগ করলে সাথে সাথে দেখাবে
+const q2=query(colRef, orderBy('createdAt','desc'));
+onSnapshot(q2, (snapshot)=>{
+  products=snapshot.docs.map(d=>({...d.data(), docId:d.id}));
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  renderAll();
+}, ()=>{
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  document.getElementById('productGrid').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><div>সংযোগ ব্যর্থ। পুনরায় চেষ্টা করুন।</div></div>';
+});
+</script>
+</body>
+</html>
