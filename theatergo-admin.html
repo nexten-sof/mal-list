@@ -186,8 +186,33 @@
           <div class="form-group"><label>পরিচালক</label><input type="text" id="f-director" placeholder="পরিচালকের নাম"></div>
           <div class="form-group"><label>রেটিং (১–১০)</label><input type="text" id="f-rating" placeholder="যেমন: ৮.৫"></div>
           <div class="form-group full"><label>অভিনেতা/অভিনেত্রী</label><input type="text" id="f-cast" placeholder="কমা দিয়ে আলাদা করুন: রিয়াজ, মৌসুমী, ফেরদৌস"></div>
-          <div class="form-group full"><label>ভিডিও URL</label><input type="text" id="f-url" placeholder="https://... (MP4 বা ইউটিউব লিঙ্ক)"></div>
-          <div class="form-group full"><label>থাম্বনেইল URL</label><input type="text" id="f-thumb" placeholder="https://... (ছবির লিঙ্ক)"></div>
+          <div class="form-group full">
+            <label>থাম্বনেইল ছবি</label>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('thumbFileInput').click()">📁 PC থেকে আপলোড</button>
+              <span style="font-size:12px;color:var(--text2);">অথবা নিচে Imgbb লিংক paste করুন</span>
+            </div>
+            <input type="file" id="thumbFileInput" accept="image/*" style="display:none;" onchange="handleThumbUpload(event)" />
+            <div id="thumbPreviewWrap" style="display:none;margin-bottom:8px;">
+              <img id="thumbPreview" style="height:80px;border-radius:6px;border:1px solid rgba(255,255,255,.1);" />
+              <button type="button" class="btn btn-ghost btn-sm" style="margin-left:8px;vertical-align:top;" onclick="clearThumb()">✕ সরাও</button>
+            </div>
+            <input type="text" id="f-thumb" placeholder="https://i.ibb.co/... (Imgbb লিংক)" oninput="previewThumbUrl(this.value)" />
+            <div style="font-size:11px;color:var(--text2);margin-top:5px;">
+              💡 <strong>Imgbb:</strong> <a href="https://imgbb.com" target="_blank" style="color:var(--accent);">imgbb.com</a> এ ছবি আপলোড করুন → "BBCode" এর পাশে Direct link কপি করুন
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>ভিডিও লিংক</label>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <button type="button" class="btn btn-ghost btn-sm" id="vidTypeYT" onclick="setVidType('youtube')" style="border-color:var(--accent);color:var(--accent);">▶ YouTube</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="vidTypeGD" onclick="setVidType('gdrive')">📁 Google Drive</button>
+            </div>
+            <input type="text" id="f-url" placeholder="YouTube বা Google Drive লিংক paste করুন" />
+            <div id="vidHint" style="font-size:11px;color:var(--text2);margin-top:5px;">
+              💡 <strong>YouTube:</strong> ভিডিওর লিংক সরাসরি paste করুন
+            </div>
+          </div>
           <div class="form-group full"><label>বর্ণনা</label><textarea id="f-desc" placeholder="মুভির সংক্ষিপ্ত বিবরণ লিখুন..."></textarea></div>
           <div class="form-group"><label>স্ট্যাটাস</label>
             <select id="f-status"><option value="active">সক্রিয় (পাবলিশড)</option><option value="inactive">নিষ্ক্রিয় (লুকানো)</option></select>
@@ -453,6 +478,70 @@ function showToast(msg, type='success') {
   _tt = setTimeout(()=>t.classList.remove('show'), 3500);
 }
 window.showToast = showToast;
+
+// ── Thumbnail Upload ──
+let _thumbBase64 = null;
+
+window.handleThumbUpload = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2097152) { showToast('❌ ছবি ২MB এর কম হতে হবে!', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    _thumbBase64 = ev.target.result;
+    document.getElementById('f-thumb').value = '';
+    document.getElementById('thumbPreview').src = _thumbBase64;
+    document.getElementById('thumbPreviewWrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+};
+
+window.previewThumbUrl = function(val) {
+  if (val.startsWith('http')) {
+    _thumbBase64 = null;
+    document.getElementById('thumbPreview').src = val;
+    document.getElementById('thumbPreviewWrap').style.display = 'block';
+  }
+};
+
+window.clearThumb = function() {
+  _thumbBase64 = null;
+  document.getElementById('f-thumb').value = '';
+  document.getElementById('thumbPreviewWrap').style.display = 'none';
+  document.getElementById('thumbFileInput').value = '';
+};
+
+// ── Video Type ──
+let _vidType = 'youtube';
+window.setVidType = function(type) {
+  _vidType = type;
+  document.getElementById('vidTypeYT').style.borderColor = type === 'youtube' ? 'var(--accent)' : '';
+  document.getElementById('vidTypeYT').style.color = type === 'youtube' ? 'var(--accent)' : '';
+  document.getElementById('vidTypeGD').style.borderColor = type === 'gdrive' ? 'var(--accent)' : '';
+  document.getElementById('vidTypeGD').style.color = type === 'gdrive' ? 'var(--accent)' : '';
+  document.getElementById('vidHint').innerHTML = type === 'youtube'
+    ? '💡 <strong>YouTube:</strong> ভিডিওর লিংক সরাসরি paste করুন'
+    : '💡 <strong>Google Drive:</strong> ফাইল → Share → "Anyone with link" → লিংক copy করুন';
+};
+
+// override saveMovie to include base64 thumb
+const _origSave = window.saveMovie;
+window.saveMovie = async function() {
+  if (_thumbBase64) {
+    document.getElementById('f-thumb').value = _thumbBase64;
+  }
+  await _origSave();
+  _thumbBase64 = null;
+  document.getElementById('thumbPreviewWrap').style.display = 'none';
+};
+
+// override resetForm to clear thumb
+const _origReset = window.resetForm;
+window.resetForm = function() {
+  _origReset();
+  clearThumb();
+  setVidType('youtube');
+};
 
 </script>
 </body>
