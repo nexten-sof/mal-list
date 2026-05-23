@@ -15,16 +15,12 @@
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
   .bg-gradient { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 80% 60% at 10% 20%, rgba(245,166,35,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(232,66,10,0.06) 0%, transparent 60%); }
-
   nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, rgba(10,10,15,0.95), transparent); }
   .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--text); text-decoration: none; }
   .logo span { color: var(--accent); }
   .nav-link { color: var(--text2); font-size: 13px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
   .nav-link:hover { color: var(--accent); }
-
   main { position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
-
-  /* LEFT PANEL */
   .left-panel { background: linear-gradient(135deg, #111118 0%, #0a0a0f 100%); padding: 120px 60px 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
   .left-panel::before { content: ''; position: absolute; top: -100px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%); pointer-events: none; }
   .left-title { font-family: 'Bebas Neue', sans-serif; font-size: 64px; letter-spacing: 2px; line-height: 0.95; }
@@ -34,14 +30,10 @@
   .feat-item { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text2); }
   .feat-icon { width: 36px; height: 36px; background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
   .already-have { margin-top: 48px; font-size: 13px; color: var(--text3); }
-  .already-have a { color: var(--accent); text-decoration: none; font-weight: 600; }
-  .already-have a:hover { text-decoration: underline; }
-
-  /* RIGHT PANEL */
+  .already-have a { color: var(--accent); text-decoration: none; font-weight: 600; cursor: pointer; }
   .right-panel { padding: 100px 60px 60px; display: flex; flex-direction: column; justify-content: center; background: var(--bg); }
   .form-heading { font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
   .form-title { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 2px; margin-bottom: 28px; }
-
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .form-group { margin-bottom: 16px; }
   .form-group.full { grid-column: 1/-1; }
@@ -49,21 +41,21 @@
   .form-input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 13px 16px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); outline: none; transition: border-color 0.2s, background 0.2s; }
   .form-input:focus { border-color: var(--accent); background: rgba(245,166,35,0.04); }
   .form-input::placeholder { color: var(--text3); }
+  .form-input.err { border-color: var(--error); }
   .password-wrap { position: relative; }
   .toggle-pass { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text2); cursor: pointer; font-size: 16px; }
-
-  .btn-main { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; letter-spacing: 0.5px; transition: opacity 0.2s, transform 0.15s; margin-top: 6px; }
+  .btn-main { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; letter-spacing: 0.5px; transition: opacity 0.2s, transform 0.15s; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
-
+  .btn-main:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .spinner-sm { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .terms-note { font-size: 11px; color: var(--text3); text-align: center; margin-top: 14px; line-height: 1.6; }
-
   .sub-prompt { margin-top: 24px; background: rgba(245,166,35,0.05); border: 1px solid rgba(245,166,35,0.15); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .sub-prompt-text { font-size: 13px; color: var(--text2); }
   .sub-prompt-text strong { color: var(--text); display: block; font-size: 14px; margin-bottom: 2px; }
-  .btn-sub { background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 9px 18px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; transition: opacity 0.2s; }
-  .btn-sub:hover { opacity: 0.85; }
-
-  /* SUCCESS */
+  .btn-sub { background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 9px 18px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .error-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius); padding: 12px 16px; font-size: 13px; color: var(--error); margin-bottom: 16px; display: none; }
+  .error-box.show { display: block; }
   .success-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); align-items: center; justify-content: center; text-align: center; padding: 20px; }
   .success-overlay.show { display: flex; }
   .success-icon { font-size: 72px; margin-bottom: 20px; animation: pop 0.5s ease; }
@@ -71,15 +63,12 @@
   .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 3px; color: var(--success); }
   .success-sub { font-size: 15px; color: var(--text2); margin-top: 10px; line-height: 1.7; }
   .success-btns { display: flex; gap: 12px; margin-top: 28px; justify-content: center; flex-wrap: wrap; }
-  .btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); border-radius: var(--radius); padding: 13px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
-  .btn-outline:hover { background: rgba(245,166,35,0.1); }
-  .btn-success-main { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: var(--radius); padding: 13px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-
+  .btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); border-radius: var(--radius); padding: 13px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-go { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: var(--radius); padding: 13px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); z-index: 999; background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 24px; font-size: 13px; font-weight: 500; transition: transform 0.3s ease; pointer-events: none; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.err { border-color: var(--error); color: var(--error); }
   .toast.ok { border-color: var(--success); color: var(--success); }
-
   @media (max-width: 768px) {
     main { grid-template-columns: 1fr; }
     .left-panel { display: none; }
@@ -90,14 +79,11 @@
 </head>
 <body>
 <div class="bg-gradient"></div>
-
 <nav>
   <a href="theatergo-index.html" class="logo">Theater<span>Go</span></a>
   <a href="theatergo-index.html" class="nav-link">← Back to Home</a>
 </nav>
-
 <main>
-  <!-- LEFT -->
   <div class="left-panel">
     <div class="left-title">Join<br><span>Theater</span><span>Go</span></div>
     <div class="left-sub">Bangladesh's original streaming platform. Watch exclusive short films, web series and big movies.</div>
@@ -109,11 +95,10 @@
     </div>
     <div class="already-have">Already have an account? <a href="theatergo-login.html">Sign In</a></div>
   </div>
-
-  <!-- RIGHT -->
   <div class="right-panel">
     <div class="form-heading">Get Started</div>
     <div class="form-title">Create Account</div>
+    <div class="error-box" id="errorBox"></div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">First Name</label>
@@ -128,7 +113,7 @@
         <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" />
       </div>
       <div class="form-group full">
-        <label class="form-label">Phone Number (Optional)</label>
+        <label class="form-label">Phone (Optional)</label>
         <input class="form-input" type="tel" id="signupPhone" placeholder="01XXXXXXXXX" />
       </div>
       <div class="form-group full">
@@ -146,7 +131,7 @@
         </div>
       </div>
     </div>
-    <button class="btn-main" onclick="doSignup()">Create Account →</button>
+    <button class="btn-main" id="signupBtn" onclick="doSignup()">Create Account →</button>
     <div class="terms-note">By creating an account, you agree to our Terms of Service and Privacy Policy.</div>
     <div class="sub-prompt">
       <div class="sub-prompt-text">
@@ -158,46 +143,106 @@
   </div>
 </main>
 
-<!-- SUCCESS -->
 <div class="success-overlay" id="successOverlay">
   <div>
     <div class="success-icon">🎉</div>
     <div class="success-title">Welcome!</div>
-    <div class="success-sub" id="successMsg">Your account has been created.<br>Start exploring TheaterGo!</div>
+    <div class="success-sub" id="successMsg">Your account has been created.</div>
     <div class="success-btns">
       <button class="btn-outline" onclick="window.location.href='theatergo-subscription.html'">👑 See Plans</button>
-      <button class="btn-success-main" onclick="window.location.href='theatergo-index.html'">Start Watching →</button>
+      <button class="btn-go" onclick="window.location.href='theatergo-index.html'">Start Watching →</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
-<script>
-function togglePass(id, btn) {
-  const inp = document.getElementById(id);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
-}
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyALY1806HVwZQZn0axnRlukL-wIlbH6tYY",
+  authDomain: "theatergo-bdabf.firebaseapp.com",
+  databaseURL: "https://theatergo-bdabf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "theatergo-bdabf",
+  storageBucket: "theatergo-bdabf.firebasestorage.app",
+  messagingSenderId: "your-messaging-id",
+  appId: "your-app-id"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
-  setTimeout(() => t.classList.remove('show'), 2800);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
-function doSignup() {
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = '⚠️ ' + msg;
+  box.classList.add('show');
+}
+
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+window.togglePass = function(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+};
+
+window.doSignup = async function() {
+  hideError();
   const first = document.getElementById('firstName').value.trim();
   const last = document.getElementById('lastName').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
   const pass = document.getElementById('signupPass').value;
   const pass2 = document.getElementById('signupPass2').value;
-  if (!first) { showToast('⚠️ Enter your first name', 'err'); return; }
-  if (!email || !email.includes('@')) { showToast('⚠️ Enter a valid email', 'err'); return; }
-  if (pass.length < 6) { showToast('⚠️ Password must be 6+ characters', 'err'); return; }
-  if (pass !== pass2) { showToast('⚠️ Passwords do not match', 'err'); return; }
-  // Firebase Auth এখানে যোগ হবে
-  document.getElementById('successMsg').innerHTML = `Welcome, <strong>${first} ${last}</strong>!<br>Your account has been created successfully.`;
-  document.getElementById('successOverlay').classList.add('show');
-}
+
+  if (!first) { showError('Please enter your first name'); return; }
+  if (!email || !email.includes('@')) { showError('Enter a valid email address'); return; }
+  if (pass.length < 6) { showError('Password must be at least 6 characters'); return; }
+  if (pass !== pass2) { showError('Passwords do not match'); return; }
+
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner-sm"></div> Creating account...';
+
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = userCred.user;
+
+    await updateProfile(user, { displayName: first + ' ' + last });
+
+    await set(ref(db, 'users/' + user.uid), {
+      firstName: first,
+      lastName: last,
+      email: email,
+      phone: phone || '',
+      plan: 'free',
+      createdAt: Date.now()
+    });
+
+    document.getElementById('successMsg').innerHTML = `Welcome, <strong>${first} ${last}</strong>!<br>Your account has been created successfully.`;
+    document.getElementById('successOverlay').classList.add('show');
+    showToast('✅ Account created!', 'ok');
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Create Account →';
+    const msgs = {
+      'auth/email-already-in-use': 'This email is already registered. Please sign in.',
+      'auth/invalid-email': 'Invalid email address.',
+      'auth/weak-password': 'Password is too weak. Use at least 6 characters.',
+      'auth/network-request-failed': 'Network error. Check your connection.'
+    };
+    showError(msgs[err.code] || 'Something went wrong. Please try again.');
+  }
+};
 </script>
 </body>
 </html>
