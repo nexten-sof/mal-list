@@ -27,8 +27,8 @@
   .hero-slides{display:flex;width:100%;height:100%;transition:transform .5s ease;}
   .hero-slide{min-width:100%;height:100%;position:relative;flex-shrink:0;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;}
   .hero-slide::after{content:'';position:absolute;inset:0;background:rgba(10,10,15,0.45);}
-  .hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,15,.95) 35%,rgba(10,10,15,.2) 100%);}
-  .hero-content{position:absolute;bottom:60px;left:40px;max-width:420px;}
+  .hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,15,.95) 35%,rgba(10,10,15,.2) 100%);z-index:1;}
+  .hero-content{position:absolute;bottom:60px;left:40px;max-width:420px;z-index:2;}
   .hero-badge{display:inline-block;background:var(--accent2);color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;}
   .hero-title{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;letter-spacing:2px;margin-bottom:12px;}
   .hero-meta{font-size:13px;color:var(--text2);margin-bottom:16px;display:flex;gap:12px;align-items:center;}
@@ -125,17 +125,17 @@
 <div class="loading-screen" id="loadingScreen">
   <div class="loading-logo">THEATER<span>GO</span></div>
   <div class="spinner"></div>
-  <div class="loading-txt">ডেটা লোড হচ্ছে...</div>
+  <div class="loading-txt">Loading...</div>
 </div>
 
 <!-- NAV -->
 <nav>
   <div class="logo" onclick="showPage('home')">THEATER<span>GO</span></div>
   <div class="nav-links">
-    <a onclick="showPage('home');setGenre('all')" class="active">হোম</a>
-    <a onclick="showPage('home');setGenre('action')">অ্যাকশন</a>
-    <a onclick="showPage('home');setGenre('drama')">ড্রামা</a>
-    <a onclick="showPage('home');setGenre('short')">শর্ট ফিল্ম</a>
+    <a onclick="showPage('home');setGenre('all')" class="active">Home</a>
+    <a onclick="showPage('home');setGenre('action')">Action</a>
+    <a onclick="showPage('home');setGenre('drama')">Drama</a>
+    <a onclick="showPage('home');setGenre('short')">Short Film</a>
 
   </div>
 </nav>
@@ -148,13 +148,13 @@
         <div style="width:100%;height:100%;background:linear-gradient(135deg,#1a0a0a,#0a1520);"></div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
-          <div class="hero-badge">🔥 ট্রেন্ডিং</div>
-          <div class="hero-title" id="h1t">লোড হচ্ছে...</div>
+          <div class="hero-badge">🔥 Trending</div>
+          <div class="hero-title" id="h1t">Loading...</div>
           <div class="hero-meta" id="h1m"></div>
           <div class="hero-desc" id="h1d"></div>
           <div class="hero-actions">
-            <button class="btn-play" id="h1btn">▶ এখনই দেখুন</button>
-            <button class="btn-outline">+ ওয়াচলিস্ট</button>
+            <button class="btn-play" id="h1btn">▶ Watch Now</button>
+            <button class="btn-outline">+ Watchlist</button>
           </div>
         </div>
       </div>
@@ -162,13 +162,13 @@
         <div style="width:100%;height:100%;background:linear-gradient(135deg,#0a1a0a,#1a0a20);"></div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
-          <div class="hero-badge" style="background:#7c6fff;">✨ নতুন</div>
-          <div class="hero-title" id="h2t">লোড হচ্ছে...</div>
+          <div class="hero-badge" style="background:#7c6fff;">✨ New</div>
+          <div class="hero-title" id="h2t">Loading...</div>
           <div class="hero-meta" id="h2m"></div>
           <div class="hero-desc" id="h2d"></div>
           <div class="hero-actions">
-            <button class="btn-play" id="h2btn">▶ এখনই দেখুন</button>
-            <button class="btn-outline">+ ওয়াচলিস্ট</button>
+            <button class="btn-play" id="h2btn">▶ Watch Now</button>
+            <button class="btn-outline">+ Watchlist</button>
           </div>
         </div>
       </div>
@@ -177,12 +177,12 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
           <div class="hero-badge" style="background:#4caf50;">🏆 পুরস্কারজয়ী</div>
-          <div class="hero-title" id="h3t">লোড হচ্ছে...</div>
+          <div class="hero-title" id="h3t">Loading...</div>
           <div class="hero-meta" id="h3m"></div>
           <div class="hero-desc" id="h3d"></div>
           <div class="hero-actions">
-            <button class="btn-play" id="h3btn">▶ এখনই দেখুন</button>
-            <button class="btn-outline">+ ওয়াচলিস্ট</button>
+            <button class="btn-play" id="h3btn">▶ Watch Now</button>
+            <button class="btn-outline">+ Watchlist</button>
           </div>
         </div>
       </div>
@@ -197,35 +197,35 @@
   <div class="section" style="padding-bottom:16px;">
     <div class="filter-chips" id="filterChips">
       <div class="chip active" onclick="filterGenre('all',this)">সব</div>
-      <div class="chip" onclick="filterGenre('action',this)">অ্যাকশন</div>
-      <div class="chip" onclick="filterGenre('drama',this)">ড্রামা</div>
-      <div class="chip" onclick="filterGenre('short',this)">শর্ট ফিল্ম</div>
-      <div class="chip" onclick="filterGenre('thriller',this)">থ্রিলার</div>
-      <div class="chip" onclick="filterGenre('romance',this)">রোমান্স</div>
-      <div class="chip" onclick="filterGenre('comedy',this)">কমেডি</div>
+      <div class="chip" onclick="filterGenre('action',this)">Action</div>
+      <div class="chip" onclick="filterGenre('drama',this)">Drama</div>
+      <div class="chip" onclick="filterGenre('short',this)">Short Film</div>
+      <div class="chip" onclick="filterGenre('thriller',this)">Thriller</div>
+      <div class="chip" onclick="filterGenre('romance',this)">Romance</div>
+      <div class="chip" onclick="filterGenre('comedy',this)">Comedy</div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-header">
-      <div class="section-title">ট্রেন্ডিং <span>এখন</span></div>
-      <span class="see-all">সব দেখুন →</span>
+      <div class="section-title">Trending <span>Now</span></div>
+      <span class="see-all">See All →</span>
     </div>
     <div class="cards-row" id="trendingRow"></div>
   </div>
 
   <div class="section">
     <div class="section-header">
-      <div class="section-title">নতুন <span>রিলিজ</span></div>
-      <span class="see-all">সব দেখুন →</span>
+      <div class="section-title">New <span>Release</span></div>
+      <span class="see-all">See All →</span>
     </div>
     <div class="cards-grid-2" id="newRow"></div>
   </div>
 
   <div class="section">
     <div class="section-header">
-      <div class="section-title">শর্ট <span>ফিল্ম</span></div>
-      <span class="see-all">সব দেখুন →</span>
+      <div class="section-title">Short <span>Film</span></div>
+      <span class="see-all">See All →</span>
     </div>
     <div class="cards-row" id="shortRow"></div>
   </div>
@@ -238,13 +238,13 @@
 <!-- PLAYER PAGE -->
 <div class="page" id="page-player">
   <div class="player-wrap">
-    <button class="back-btn" onclick="showPage('home')">← হোমে ফিরুন</button>
+    <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
     <div class="video-box" id="videoBox">
       <div class="video-placeholder" id="videoPlaceholder">
         <div class="play-big" onclick="togglePlay()">
           <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
         </div>
-        <p id="videoTitle">ভিডিও লোড হচ্ছে...</p>
+        <p id="videoTitle">ভিডিও Loading...</p>
       </div>
       <video id="mainVideo" style="display:none;" controls></video>
     </div>
@@ -296,7 +296,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // ── Helpers ──
-const genreNames = {action:'অ্যাকশন',drama:'ড্রামা',short:'শর্ট ফিল্ম',thriller:'থ্রিলার',romance:'রোমান্স',comedy:'কমেডি'};
+const genreNames = {action:'Action',drama:'Drama',short:'Short Film',thriller:'Thriller',romance:'Romance',comedy:'Comedy'};
 
 const SAMPLE = [
   {id:'m1',title:'দ্য লাস্ট শ্যাডো',genre:'thriller',duration:'১ঘ ৪৫মি',year:'২০২৪',director:'আরিফ হোসেন',cast:'রিয়াজ,মৌসুমী,ফেরদৌস',desc:'একটি রহস্যময় গোয়েন্দা এবং তার শেষ মিশনের গল্প। সত্য ও মিথ্যার দ্বন্দ্বে এক থ্রিলিং যাত্রা।',url:'',status:'active',thumb:'',rating:'৮.৪',views:1240},
@@ -304,7 +304,7 @@ const SAMPLE = [
   {id:'m3',title:'মুক্তির পথে',genre:'short',duration:'৩৫মি',year:'২০২৩',director:'কামরুল হাসান',cast:'মোশাররফ করিম,নুসরাত',desc:'স্বাধীনতার সংগ্রামে একজন তরুণের জীবনের টার্নিং পয়েন্ট।',url:'',status:'active',thumb:'',rating:'৯.৬',views:2100},
   {id:'m4',title:'ঢাকার রাত',genre:'action',duration:'৫৮মি',year:'২০২৪',director:'হুমায়ূন ফরীদি',cast:'সিয়াম,পূজা',desc:'ঢাকার রাতের অন্ধকারে এক সাহসী পুলিশ অফিসারের গল্প।',url:'',status:'active',thumb:'',rating:'৭.৮',views:560},
   {id:'m5',title:'প্রেমের খেলা',genre:'romance',duration:'৪২মি',year:'২০২৪',director:'নাজিমুদ্দিন',cast:'আফরান,মিথিলা',desc:'ডিজিটাল যুগে প্রেম এবং সম্পর্কের জটিলতা।',url:'',status:'active',thumb:'',rating:'৮.০',views:780},
-  {id:'m6',title:'হাসির ফাঁদ',genre:'comedy',duration:'৩২মি',year:'২০২৩',director:'মামুনুর রশীদ',cast:'চঞ্চল,বিদ্যা',desc:'গ্রাম-শহরের মিশেলে এক অসাধারণ কমেডি।',url:'',status:'active',thumb:'',rating:'৮.৫',views:345},
+  {id:'m6',title:'হাসির ফাঁদ',genre:'comedy',duration:'৩২মি',year:'২০২৩',director:'মামুনুর রশীদ',cast:'চঞ্চল,বিদ্যা',desc:'গ্রাম-শহরের মিশেলে এক অসাধারণ Comedy।',url:'',status:'active',thumb:'',rating:'৮.৫',views:345},
   {id:'m7',title:'আলোর খোঁজে',genre:'short',duration:'১৮মি',year:'২০২৪',director:'ফারুক আহমেদ',cast:'জয়া,রাফি',desc:'একটি শিশুর চোখে দেখা পৃথিবীর গল্প।',url:'',status:'active',thumb:'',rating:'৯.৩',views:1560},
 ];
 
@@ -378,12 +378,17 @@ function populateHero() {
     document.getElementById(s.m).innerHTML = `<span>${mv.year}</span><span style="opacity:.4">|</span><span>${mv.duration}</span><span style="opacity:.4">|</span><span style="color:var(--accent)">★ ${mv.rating}</span>`;
     document.getElementById(s.d).textContent = mv.desc.substring(0,100)+'...';
     document.getElementById(s.btn).onclick = () => playMovie(mv.id);
-    // Hero slide background ছবি সেট করুন
+    // Hero slide ছবি — img tag দিয়ে inject করা
     const slideEl = document.querySelectorAll('.hero-slide')[i];
     if (slideEl && mv.thumb) {
-      slideEl.style.backgroundImage = `url('${mv.thumb}')`;
-      slideEl.style.backgroundSize = 'cover';
-      slideEl.style.backgroundPosition = 'center';
+      // পুরনো ছবি সরাও
+      const oldImg = slideEl.querySelector('.hero-bg-img');
+      if (oldImg) oldImg.remove();
+      const img = document.createElement('img');
+      img.className = 'hero-bg-img';
+      img.src = mv.thumb;
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;';
+      slideEl.insertBefore(img, slideEl.firstChild);
     }
   });
 }
@@ -392,7 +397,7 @@ function populateHero() {
 function renderPortrait(id, list) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">কোনো কন্টেন্ট নেই</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">No content found</div>'; return; }
   el.innerHTML = list.map(m => `
     <div class="card-p" onclick="playMovie('${m.id}')">
       <div class="card-p-img" style="background:${getCardBg(m.genre)}">
@@ -407,7 +412,7 @@ function renderPortrait(id, list) {
 function renderWide(id, list) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">কোনো কন্টেন্ট নেই</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">No content found</div>'; return; }
   el.innerHTML = list.map(m => `
     <div class="card-w" onclick="playMovie('${m.id}')" style="background:${getCardBg(m.genre)}">
       <div class="placeholder-icon">${getEmoji(m.genre)}</div>
@@ -444,13 +449,13 @@ async function playMovie(id) {
   document.getElementById('movieTitleBig').textContent = m.title;
   document.getElementById('movieTags').innerHTML = [genreNames[m.genre]||m.genre, m.year, m.duration].map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('movieStats').innerHTML = `
-    <div class="movie-stat"><span>রেটিং</span><strong style="color:var(--accent)">★ ${m.rating}</strong></div>
-    <div class="movie-stat"><span>সময়</span><strong>${m.duration}</strong></div>
-    <div class="movie-stat"><span>পরিচালক</span><strong>${m.director||'অজানা'}</strong></div>`;
+    <div class="movie-stat"><span>Rating</span><strong style="color:var(--accent)">★ ${m.rating}</strong></div>
+    <div class="movie-stat"><span>Duration</span><strong>${m.duration}</strong></div>
+    <div class="movie-stat"><span>Director</span><strong>${m.director||'Unknown'}</strong></div>`;
   document.getElementById('movieDescFull').textContent = m.desc;
   const castArr = (m.cast||'').split(',').filter(Boolean);
-  document.getElementById('castList').innerHTML = `<div class="cast-title">অভিনেতা-অভিনেত্রী</div>`+
-    castArr.map(c=>`<div class="cast-item"><div class="cast-avatar">${c.trim()[0]||'?'}</div><div><div class="cast-name">${c.trim()}</div><div class="cast-role">অভিনেতা/অভিনেত্রী</div></div></div>`).join('');
+  document.getElementById('castList').innerHTML = `<div class="cast-title">Cast</div>`+
+    castArr.map(c=>`<div class="cast-item"><div class="cast-avatar">${c.trim()[0]||'?'}</div><div><div class="cast-name">${c.trim()}</div><div class="cast-role">Actor/Actress</div></div></div>`).join('');
   renderPortrait('relatedRow', allMovies.filter(x=>x.id!==id&&x.genre===m.genre).slice(0,6));
   const vid = document.getElementById('mainVideo');
   const ph = document.getElementById('videoPlaceholder');
@@ -499,7 +504,7 @@ async function playMovie(id) {
   } else {
     vid.style.display = 'none';
     ph.style.display = 'flex';
-    ph.querySelector('p').textContent = m.title + ' — ভিডিও ফাইল যোগ করা হয়নি';
+    ph.querySelector('p').textContent = m.title + ' — Video not available';
   }
 }
 window.playMovie = playMovie;
