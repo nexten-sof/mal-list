@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TheaterGo — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --bg2: #111118; --bg3: #1a1a24;
+    --accent: #f5a623; --accent2: #e8420a;
+    --text: #f0f0f0; --text2: #888; --text3: #555;
+    --border: rgba(255,255,255,0.08); --success: #22c55e; --error: #ef4444; --radius: 12px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+  .bg-gradient { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 80% 60% at 80% 20%, rgba(245,166,35,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 20% 80%, rgba(232,66,10,0.06) 0%, transparent 60%); }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, rgba(10,10,15,0.95), transparent); }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-link { color: var(--text2); font-size: 13px; font-weight: 500; text-decoration: none; }
+  .nav-link:hover { color: var(--accent); }
+  main { position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 20px 40px; }
+  .login-wrap { width: 100%; max-width: 420px; }
+  .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--text2); margin-bottom: 24px; text-align: center; }
+  .login-logo span { color: var(--accent); }
+  .login-title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 2px; text-align: center; margin-bottom: 6px; }
+  .login-sub { font-size: 14px; color: var(--text2); text-align: center; margin-bottom: 32px; }
+  .form-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); font-weight: 600; margin-bottom: 8px; display: block; }
+  .form-input { width: 100%; background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 13px 16px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--accent); background: rgba(245,166,35,0.04); }
+  .form-input::placeholder { color: var(--text3); }
+  .password-wrap { position: relative; }
+  .toggle-pass { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text2); cursor: pointer; font-size: 16px; }
+  .forgot-link { text-align: right; margin-top: 6px; }
+  .forgot-link a { font-size: 12px; color: var(--accent); text-decoration: none; cursor: pointer; }
+  .btn-main { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s, transform 0.15s; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-main:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .spinner-sm { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius); padding: 12px 16px; font-size: 13px; color: var(--error); margin-bottom: 16px; display: none; }
+  .error-box.show { display: block; }
+  .switch-link { text-align: center; font-size: 13px; color: var(--text2); margin-top: 20px; }
+  .switch-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .reset-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px); }
+  .reset-overlay.open { display: flex; }
+  .reset-modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 380px; padding: 28px; }
+  .reset-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; margin-bottom: 6px; }
+  .reset-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+  .reset-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-cancel { flex: 1; background: var(--bg3); color: var(--text2); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-reset { flex: 2; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: var(--radius); padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); z-index: 999; background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 24px; font-size: 13px; font-weight: 500; transition: transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.err { border-color: var(--error); color: var(--error); }
+  .toast.ok { border-color: var(--success); color: var(--success); }
+</style>
+</head>
+<body>
+<div class="bg-gradient"></div>
+<nav>
+  <a href="theatergo-index.html" class="logo">Theater<span>Go</span></a>
+  <a href="theatergo-index.html" class="nav-link">← Back to Home</a>
+</nav>
+<main>
+  <div class="login-wrap">
+    <div class="login-title">Welcome Back</div>
+    <div class="login-sub">Sign in to continue watching</div>
+    <div class="form-card">
+      <div class="error-box" id="errorBox"></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="loginPass" placeholder="Your password" />
+          <button class="toggle-pass" onclick="togglePass('loginPass',this)">👁</button>
+        </div>
+        <div class="forgot-link"><a onclick="openReset()">Forgot password?</a></div>
+      </div>
+      <button class="btn-main" id="loginBtn" onclick="doLogin()">Sign In →</button>
+    </div>
+    <div class="switch-link">Don't have an account? <a href="theatergo-signup.html">Sign Up</a></div>
+  </div>
+</main>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="reset-overlay" id="resetOverlay" onclick="if(event.target===this)closeReset()">
+  <div class="reset-modal">
+    <div class="reset-title">Reset Password</div>
+    <div class="reset-sub">Enter your email and we'll send a reset link</div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" type="email" id="resetEmail" placeholder="you@example.com" />
+    </div>
+    <div class="reset-actions">
+      <button class="btn-cancel" onclick="closeReset()">Cancel</button>
+      <button class="btn-reset" onclick="doReset()">Send Reset Link</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyALY1806HVwZQZn0axnRlukL-wIlbH6tYY",
+  authDomain: "theatergo-bdabf.firebaseapp.com",
+  databaseURL: "https://theatergo-bdabf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "theatergo-bdabf",
+  storageBucket: "theatergo-bdabf.firebasestorage.app",
+  messagingSenderId: "your-messaging-id",
+  appId: "your-app-id"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = '⚠️ ' + msg; box.classList.add('show');
+}
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+window.togglePass = (id, btn) => {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+};
+
+window.openReset = () => {
+  document.getElementById('resetEmail').value = document.getElementById('loginEmail').value;
+  document.getElementById('resetOverlay').classList.add('open');
+};
+window.closeReset = () => document.getElementById('resetOverlay').classList.remove('open');
+
+window.doLogin = async function() {
+  hideError();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!email) { showError('Enter your email address'); return; }
+  if (!pass) { showError('Enter your password'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner-sm"></div> Signing in...';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    showToast('✅ Signed in successfully!', 'ok');
+    setTimeout(() => window.location.href = 'theatergo-index.html', 1000);
+  } catch (err) {
+    btn.disabled = false; btn.innerHTML = 'Sign In →';
+    const msgs = {
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/wrong-password': 'Incorrect password. Try again.',
+      'auth/invalid-credential': 'Email or password is incorrect.',
+      'auth/too-many-requests': 'Too many attempts. Try again later.',
+      'auth/network-request-failed': 'Network error. Check your connection.'
+    };
+    showError(msgs[err.code] || 'Something went wrong. Please try again.');
+  }
+};
+
+window.doReset = async function() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showToast('⚠️ Enter your email', 'err'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    closeReset();
+    showToast('✅ Reset link sent! Check your email.', 'ok');
+  } catch (err) {
+    showToast('⚠️ ' + (err.code === 'auth/user-not-found' ? 'Email not found.' : 'Failed to send. Try again.'), 'err');
+  }
+};
+</script>
+</body>
+</html>
