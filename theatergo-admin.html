@@ -118,6 +118,10 @@
         <span class="icon">🎬</span> মুভি ম্যানেজ
         <span class="badge" id="movieCount">0</span>
       </div>
+      <div class="sidebar-item" id="tab-btn-payments" onclick="switchTab('payments',this)">
+        <span class="icon">💳</span> Payment Requests
+        <span class="badge" id="paymentCount" style="background:#e2136e;">0</span>
+      </div>
       <div class="sidebar-item" id="tab-btn-add" onclick="switchTab('add',this)">
         <span class="icon">➕</span> নতুন যোগ করুন
       </div>
@@ -234,6 +238,20 @@
     </div>
 
     <!-- SETTINGS -->
+    <!-- PAYMENT REQUESTS -->
+    <div class="page-section" id="tab-payments">
+      <div class="sec-header">
+        <div class="sec-title">Payment <span>Requests</span></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm pf-btn active" id="pf-pending" onclick="filterPayments('pending',this)">⏳ Pending</button>
+        <button class="btn btn-ghost btn-sm pf-btn" id="pf-approved" onclick="filterPayments('approved',this)">✅ Approved</button>
+        <button class="btn btn-ghost btn-sm pf-btn" id="pf-rejected" onclick="filterPayments('rejected',this)">❌ Rejected</button>
+        <button class="btn btn-ghost btn-sm pf-btn" id="pf-all" onclick="filterPayments('all',this)">📋 All</button>
+      </div>
+      <div id="paymentsList" style="display:flex;flex-direction:column;gap:12px;"></div>
+    </div>
+
     <div class="page-section" id="tab-settings">
       <div class="sec-header"><div class="sec-title">সাধারণ <span>সেটিং</span></div></div>
       <div style="background:var(--bg2);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);padding:28px;max-width:500px;">
@@ -493,6 +511,91 @@ function showToast(msg, type='success') {
   _tt = setTimeout(()=>t.classList.remove('show'), 3500);
 }
 window.showToast = showToast;
+
+// ── PAYMENT REQUESTS ──
+let allPayments = [];
+let paymentFilter = 'pending';
+
+onValue(ref(db, 'paymentRequests'), snap => {
+  allPayments = [];
+  if (snap.exists()) {
+    snap.forEach(child => allPayments.push({ key: child.key, ...child.val() }));
+  }
+  allPayments.sort((a,b) => b.createdAt - a.createdAt);
+  const pending = allPayments.filter(p => p.status === 'pending').length;
+  document.getElementById('paymentCount').textContent = pending;
+  renderPayments();
+});
+
+function renderPayments() {
+  const list = paymentFilter === 'all' ? allPayments : allPayments.filter(p => p.status === paymentFilter);
+  const container = document.getElementById('paymentsList');
+  if (!list.length) {
+    container.innerHTML = '<div style="text-align:center;padding:60px;color:#555;font-size:14px;">কোনো payment request নেই।</div>';
+    return;
+  }
+  container.innerHTML = list.map(p => {
+    const date = new Date(p.createdAt).toLocaleString('en-BD');
+    const statusColor = p.status==='approved'?'#22c55e':p.status==='rejected'?'#ef4444':'#f5a623';
+    const statusText = p.status==='approved'?'✅ Approved':p.status==='rejected'?'❌ Rejected':'⏳ Pending';
+    return `<div style="background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-weight:700;font-size:15px;color:#f0f0f0;">${p.userName}</div>
+          <div style="font-size:12px;color:#888;margin-top:3px;">${p.userEmail}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:#f5a623;">৳${p.amount}</div>
+          <div style="font-size:11px;color:#888;">${p.plan==='basic'?'⭐ Basic':'👑 Premium'}</div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:#888;">bKash: <span style="color:#e2136e;font-weight:700;">${p.userBkash}</span></div>
+          <div style="font-size:12px;color:#888;margin-top:2px;">TXN: <span style="color:#f0f0f0;font-weight:700;">${p.txnId}</span></div>
+          <div style="font-size:11px;color:#555;margin-top:2px;">${date}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <span style="font-size:12px;font-weight:700;color:${statusColor};">${statusText}</span>
+          ${p.status==='pending'?`
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm" style="background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.25);" onclick="approvePayment('${p.key}','${p.userId}','${p.plan}')">✅ Approve</button>
+            <button class="btn btn-sm" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);" onclick="rejectPayment('${p.key}')">❌ Reject</button>
+          </div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.filterPayments = function(filter, el) {
+  paymentFilter = filter;
+  document.querySelectorAll('.pf-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPayments();
+};
+
+window.approvePayment = async function(key, userId, plan) {
+  if (!confirm('এই payment approve করবেন? User এর plan activate হবে।')) return;
+  try {
+    // payment status update
+    await set(ref(db, `paymentRequests/${key}/status`), 'approved');
+    await set(ref(db, `paymentRequests/${key}/approvedAt`), Date.now());
+    // user plan update
+    const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
+    await set(ref(db, `users/${userId}/plan`), plan);
+    await set(ref(db, `users/${userId}/planExpiry`), expiry);
+    await set(ref(db, `users/${userId}/planActivatedAt`), Date.now());
+    showToast('✅ Payment approved! User plan activated.', 'success');
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+};
+
+window.rejectPayment = async function(key) {
+  if (!confirm('এই payment reject করবেন?')) return;
+  try {
+    await set(ref(db, `paymentRequests/${key}/status`), 'rejected');
+    await set(ref(db, `paymentRequests/${key}/rejectedAt`), Date.now());
+    showToast('❌ Payment rejected.', 'success');
+  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+};
 
 // ── Content Type ──
 let currentCtype = 'free';
