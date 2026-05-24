@@ -55,6 +55,11 @@
   .movie-name-cell{font-weight:600;}
   .movie-genre-tag{background:rgba(232,197,71,.1);color:var(--accent);font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;letter-spacing:.5px;}
   .status-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;letter-spacing:.5px;}
+  .ctype-card{background:#1a1a24;border:2px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;}
+  .ctype-card:hover{border-color:rgba(255,255,255,0.2);}
+  .ctype-card.selected{border-color:var(--accent);background:rgba(245,166,35,0.08);}
+  .ctype-card#ctype-free.selected{border-color:#22c55e;background:rgba(34,197,94,0.08);}
+  .ctype-card#ctype-subscription.selected{border-color:#a78bfa;background:rgba(167,139,250,0.08);}
   .status-active{background:rgba(71,232,112,.12);color:var(--success);}
   .status-inactive{background:rgba(232,71,71,.12);color:var(--danger);}
   .action-btns{display:flex;gap:6px;}
@@ -112,10 +117,6 @@
       <div class="sidebar-item" id="tab-btn-movies" onclick="switchTab('movies',this)">
         <span class="icon">🎬</span> মুভি ম্যানেজ
         <span class="badge" id="movieCount">0</span>
-      </div>
-      <div class="sidebar-item" id="tab-btn-series" onclick="switchTab('series',this)">
-        <span class="icon">📺</span> ওয়েব সিরিজ
-        <span class="badge" id="seriesCount">0</span>
       </div>
       <div class="sidebar-item" id="tab-btn-add" onclick="switchTab('add',this)">
         <span class="icon">➕</span> নতুন যোগ করুন
@@ -196,6 +197,33 @@
           <div class="form-group"><label>স্ট্যাটাস</label>
             <select id="f-status"><option value="active">সক্রিয় (পাবলিশড)</option><option value="inactive">নিষ্ক্রিয় (লুকানো)</option></select>
           </div>
+
+          <!-- CONTENT TYPE -->
+          <div class="form-group full">
+            <label style="margin-bottom:10px;display:block;">কন্টেন্ট টাইপ — কীভাবে দেখা যাবে?</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="ctype-card selected" id="ctype-free" onclick="selectCtype('free')">
+                <div style="font-size:24px;margin-bottom:6px;">🆓</div>
+                <div style="font-size:13px;font-weight:700;color:#22c55e;">Free</div>
+                <div style="font-size:11px;color:#666;margin-top:3px;">বিজ্ঞাপন সহ সবাই দেখতে পাবে</div>
+              </div>
+              <div class="ctype-card" id="ctype-rent" onclick="selectCtype('rent')">
+                <div style="font-size:24px;margin-bottom:6px;">💳</div>
+                <div style="font-size:13px;font-weight:700;color:#f5a623;">Rent</div>
+                <div style="font-size:11px;color:#666;margin-top:3px;">একবার কিনলে চিরকাল দেখা যাবে</div>
+                <input type="number" id="f-rent-price" class="form-input" placeholder="৳ মূল্য" style="margin-top:8px;display:none;font-size:12px;padding:6px 10px;" onclick="event.stopPropagation()" />
+              </div>
+              <div class="ctype-card" id="ctype-subscription" onclick="selectCtype('subscription')">
+                <div style="font-size:24px;margin-bottom:6px;">👑</div>
+                <div style="font-size:13px;font-weight:700;color:#a78bfa;">Subscription</div>
+                <div style="font-size:11px;color:#666;margin-top:3px;">শুধু সাবস্ক্রাইবাররা দেখতে পাবে</div>
+                <select id="f-sub-plan" class="form-input" style="margin-top:8px;display:none;font-size:12px;padding:6px 10px;" onclick="event.stopPropagation()">
+                  <option value="basic">Basic+</option>
+                  <option value="premium">Premium only</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
         <input type="hidden" id="f-id">
         <div style="margin-top:24px;display:flex;gap:12px;">
@@ -206,87 +234,6 @@
     </div>
 
     <!-- SETTINGS -->
-    <!-- WEB SERIES -->
-    <div class="page-section" id="tab-series">
-      <div class="sec-header">
-        <div class="sec-title">ওয়েব <span>সিরিজ</span></div>
-        <button class="btn btn-primary" onclick="openAddSeries()">➕ নতুন সিরিজ</button>
-      </div>
-
-      <!-- SERIES LIST -->
-      <div id="seriesList" style="display:flex;flex-direction:column;gap:16px;"></div>
-    </div>
-
-    <!-- ADD/EDIT SERIES MODAL -->
-    <div id="seriesFormOverlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);">
-      <div style="background:#111118;border:1px solid rgba(255,255,255,0.1);border-radius:16px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;position:relative;">
-        <div style="background:linear-gradient(135deg,#1a1a24,#111118);padding:24px 28px;border-radius:16px 16px 0 0;border-bottom:1px solid rgba(255,255,255,0.08);">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;" id="seriesFormTitle">নতুন সিরিজ যোগ করুন</div>
-          <div style="font-size:12px;color:#888;margin-top:3px;">সিরিজের তথ্য পূরণ করুন</div>
-        </div>
-        <div style="padding:24px 28px;">
-          <div class="form-grid">
-            <div class="form-group full">
-              <label>সিরিজের নাম *</label>
-              <input type="text" id="sf-title" class="form-input" placeholder="যেমন: ঢাকার গল্প" />
-            </div>
-            <div class="form-group">
-              <label>ঘরানা (Genre)</label>
-              <select id="sf-genre" class="form-input">
-                <option value="drama">Drama</option>
-                <option value="action">Action</option>
-                <option value="thriller">Thriller</option>
-                <option value="romance">Romance</option>
-                <option value="comedy">Comedy</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>রেটিং (যেমন: ৮.৫)</label>
-              <input type="number" id="sf-rating" class="form-input" placeholder="৮.৫" step="0.1" min="0" max="10" />
-            </div>
-            <div class="form-group full">
-              <label>থাম্বনেইল URL (Imgbb লিংক)</label>
-              <input type="text" id="sf-thumb" class="form-input" placeholder="https://i.ibb.co/..." oninput="previewSeriesThumb(this.value)" />
-              <img id="sf-thumb-preview" style="height:80px;margin-top:8px;border-radius:6px;display:none;object-fit:cover;" />
-            </div>
-            <div class="form-group full">
-              <label>বর্ণনা</label>
-              <textarea id="sf-desc" class="form-input" rows="3" placeholder="সিরিজ সম্পর্কে সংক্ষিপ্ত বিবরণ..."></textarea>
-            </div>
-            <div class="form-group">
-              <label>স্ট্যাটাস</label>
-              <select id="sf-status" class="form-input">
-                <option value="active">সক্রিয় (Published)</option>
-                <option value="draft">ড্রাফট</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Plan (কারা দেখতে পাবে)</label>
-              <select id="sf-plan" class="form-input">
-                <option value="free">Free (সবাই)</option>
-                <option value="basic">Basic+</option>
-                <option value="premium">Premium only</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- EPISODES -->
-          <div style="margin-top:24px;border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-              <div style="font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;">এপিসোড সমূহ</div>
-              <button class="btn btn-ghost btn-sm" onclick="addEpisodeField()">➕ এপিসোড যোগ করুন</button>
-            </div>
-            <div id="episodesContainer" style="display:flex;flex-direction:column;gap:12px;"></div>
-          </div>
-
-          <div style="display:flex;gap:10px;margin-top:24px;border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;">
-            <button class="btn btn-ghost" onclick="closeSeriesForm()" style="flex:1;">বাতিল</button>
-            <button class="btn btn-primary" onclick="saveSeries()" style="flex:2;" id="seriesSaveBtn">💾 Firebase এ সেভ করুন</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="page-section" id="tab-settings">
       <div class="sec-header"><div class="sec-title">সাধারণ <span>সেটিং</span></div></div>
       <div style="background:var(--bg2);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);padding:28px;max-width:500px;">
@@ -428,6 +375,7 @@ window.renderMoviesTable = function() {
         <td style="color:var(--accent)">★ ${m.rating}</td>
         <td>${(m.views||0).toLocaleString('en')}</td>
         <td><span class="status-badge ${m.status==='active'?'status-active':'status-inactive'}">${m.status==='active'?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
+        <td><span style="font-size:11px;padding:3px 8px;border-radius:8px;font-weight:700;background:${m.ctype==='rent'?'rgba(245,166,35,0.12)':m.ctype==='subscription'?'rgba(167,139,250,0.12)':'rgba(34,197,94,0.12)'};color:${m.ctype==='rent'?'#f5a623':m.ctype==='subscription'?'#a78bfa':'#22c55e'}">${m.ctype==='rent'?'💳 Rent':m.ctype==='subscription'?'👑 Sub':'🆓 Free'}</span></td>
         <td><div class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="editMovie('${m.id}')">✏️ এডিট</button>
           <button class="btn btn-danger btn-sm" onclick="confirmDelete('${m.id}','${m.title.replace(/'/g,"\\'")}')">🗑️</button>
@@ -441,6 +389,7 @@ window.resetForm = function() {
   ['f-id','f-title','f-duration','f-year','f-director','f-rating','f-cast','f-url','f-thumb','f-desc'].forEach(id => document.getElementById(id).value='');
   document.getElementById('f-genre').value='action';
   document.getElementById('f-status').value='active';
+  selectCtype('free');
   document.getElementById('formTitle').innerHTML='নতুন <span>যোগ করুন</span>';
 };
 
@@ -459,6 +408,9 @@ window.editMovie = function(id) {
   document.getElementById('f-thumb').value = m.thumb||'';
   document.getElementById('f-desc').value = m.desc||'';
   document.getElementById('f-status').value = m.status||'active';
+  selectCtype(m.ctype||'free');
+  if(m.ctype==='rent') document.getElementById('f-rent-price').value = m.rentPrice||'';
+  if(m.ctype==='subscription') document.getElementById('f-sub-plan').value = m.subPlan||'basic';
   document.getElementById('formTitle').innerHTML='মুভি <span>এডিট করুন</span>';
   switchTab('add', document.getElementById('tab-btn-add'));
   window.scrollTo({top:0,behavior:'smooth'});
@@ -482,6 +434,9 @@ window.saveMovie = async function() {
     thumb: document.getElementById('f-thumb').value.trim(),
     desc: document.getElementById('f-desc').value.trim(),
     status: document.getElementById('f-status').value,
+    ctype: currentCtype,
+    rentPrice: currentCtype === 'rent' ? (document.getElementById('f-rent-price').value||'') : '',
+    subPlan: currentCtype === 'subscription' ? document.getElementById('f-sub-plan').value : '',
     views: existing ? (existing.views||0) : 0,
   };
   try {
@@ -539,217 +494,17 @@ function showToast(msg, type='success') {
 }
 window.showToast = showToast;
 
-// ══════════════════════════════════════
-// WEB SERIES MANAGEMENT
-// ══════════════════════════════════════
-const seriesRef = ref(db, 'series');
-let seriesList = [];
-let editingSeriesId = null;
-let episodeCount = 0;
-
-// Real-time series listener
-onValue(seriesRef, (snap) => {
-  seriesList = [];
-  if (snap.exists()) {
-    snap.forEach(child => {
-      seriesList.push({ id: child.key, ...child.val() });
-    });
-  }
-  seriesList.reverse();
-  document.getElementById('seriesCount').textContent = seriesList.length;
-  renderSeriesList();
-});
-
-function renderSeriesList() {
-  const container = document.getElementById('seriesList');
-  if (!seriesList.length) {
-    container.innerHTML = '<div style="text-align:center;padding:60px;color:#555;font-size:14px;">📺 কোনো ওয়েব সিরিজ নেই। নতুন সিরিজ যোগ করুন।</div>';
-    return;
-  }
-  container.innerHTML = seriesList.map(s => {
-    const eps = s.episodes ? Object.values(s.episodes) : [];
-    return `<div style="background:#1a1a24;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
-      <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;">
-        <div style="width:72px;height:50px;background:#111;border-radius:6px;overflow:hidden;flex-shrink:0;">
-          ${s.thumb ? `<img src="${s.thumb}" style="width:100%;height:100%;object-fit:cover;" />` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">📺</div>'}
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;font-size:15px;color:#f0f0f0;">${s.title}</div>
-          <div style="font-size:12px;color:#888;margin-top:3px;">${s.genre||''} · ${eps.length} এপিসোড · ${s.plan==='free'?'🆓 Free':s.plan==='basic'?'⭐ Basic':'👑 Premium'}</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-shrink:0;">
-          <button class="btn btn-ghost btn-sm" onclick="editSeries('${s.id}')">✏️ এডিট</button>
-          <button class="btn btn-sm" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);" onclick="deleteSeries('${s.id}')">🗑️</button>
-        </div>
-      </div>
-      ${eps.length ? `<div style="border-top:1px solid rgba(255,255,255,0.06);padding:12px 20px;display:flex;flex-wrap:wrap;gap:8px;">
-        ${eps.map((ep,i) => `<div style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 12px;font-size:12px;color:#888;">
-          <span style="color:#f5a623;font-weight:700;">EP${i+1}</span> ${ep.title||'Episode '+(i+1)}
-        </div>`).join('')}
-      </div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-window.openAddSeries = function() {
-  editingSeriesId = null;
-  episodeCount = 0;
-  document.getElementById('seriesFormTitle').textContent = 'নতুন সিরিজ যোগ করুন';
-  ['sf-title','sf-desc'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('sf-rating').value = '';
-  document.getElementById('sf-thumb').value = '';
-  document.getElementById('sf-thumb-preview').style.display = 'none';
-  document.getElementById('sf-genre').value = 'drama';
-  document.getElementById('sf-status').value = 'active';
-  document.getElementById('sf-plan').value = 'free';
-  document.getElementById('episodesContainer').innerHTML = '';
-  addEpisodeField();
-  document.getElementById('seriesFormOverlay').style.display = 'flex';
-};
-
-window.closeSeriesForm = function() {
-  document.getElementById('seriesFormOverlay').style.display = 'none';
-};
-
-window.previewSeriesThumb = function(val) {
-  const img = document.getElementById('sf-thumb-preview');
-  if (val.startsWith('http')) { img.src = val; img.style.display = 'block'; }
-  else { img.style.display = 'none'; }
-};
-
-window.addEpisodeField = function() {
-  episodeCount++;
-  const n = episodeCount;
-  const div = document.createElement('div');
-  div.id = 'ep-' + n;
-  div.style.cssText = 'background:#0a0a0f;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;position:relative;';
-  div.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#f5a623;letter-spacing:1px;">EPISODE ${n}</div>
-      <button onclick="document.getElementById('ep-${n}').remove()" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;">✕</button>
-    </div>
-    <div class="form-grid" style="gap:10px;">
-      <div class="form-group full">
-        <label>এপিসোড শিরোনাম</label>
-        <input type="text" id="ep-${n}-title" class="form-input" placeholder="যেমন: প্রথম পর্ব" />
-      </div>
-      <div class="form-group full">
-        <label>ভিডিও লিংক (Google Drive / YouTube)</label>
-        <input type="text" id="ep-${n}-url" class="form-input" placeholder="https://drive.google.com/file/d/..." />
-      </div>
-      <div class="form-group full">
-        <label>থাম্বনেইল URL (ঐচ্ছিক)</label>
-        <input type="text" id="ep-${n}-thumb" class="form-input" placeholder="https://i.ibb.co/..." />
-      </div>
-      <div class="form-group">
-        <label>সময়কাল (মিনিট)</label>
-        <input type="number" id="ep-${n}-dur" class="form-input" placeholder="২৫" />
-      </div>
-      <div class="form-group">
-        <label>এপিসোড নম্বর</label>
-        <input type="number" id="ep-${n}-num" class="form-input" value="${n}" />
-      </div>
-    </div>`;
-  document.getElementById('episodesContainer').appendChild(div);
-};
-
-window.editSeries = function(id) {
-  const s = seriesList.find(x => x.id === id);
-  if (!s) return;
-  editingSeriesId = id;
-  episodeCount = 0;
-  document.getElementById('seriesFormTitle').textContent = 'সিরিজ এডিট করুন';
-  document.getElementById('sf-title').value = s.title || '';
-  document.getElementById('sf-desc').value = s.desc || '';
-  document.getElementById('sf-rating').value = s.rating || '';
-  document.getElementById('sf-thumb').value = s.thumb || '';
-  document.getElementById('sf-genre').value = s.genre || 'drama';
-  document.getElementById('sf-status').value = s.status || 'active';
-  document.getElementById('sf-plan').value = s.plan || 'free';
-  previewSeriesThumb(s.thumb || '');
-  document.getElementById('episodesContainer').innerHTML = '';
-  const eps = s.episodes ? Object.values(s.episodes) : [];
-  eps.forEach(ep => {
-    episodeCount++;
-    const n = episodeCount;
-    const div = document.createElement('div');
-    div.id = 'ep-' + n;
-    div.style.cssText = 'background:#0a0a0f;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;position:relative;';
-    div.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:700;color:#f5a623;letter-spacing:1px;">EPISODE ${n}</div>
-        <button onclick="document.getElementById('ep-${n}').remove()" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;">✕</button>
-      </div>
-      <div class="form-grid" style="gap:10px;">
-        <div class="form-group full"><label>এপিসোড শিরোনাম</label><input type="text" id="ep-${n}-title" class="form-input" value="${ep.title||''}" /></div>
-        <div class="form-group full"><label>ভিডিও লিংক</label><input type="text" id="ep-${n}-url" class="form-input" value="${ep.url||''}" /></div>
-        <div class="form-group full"><label>থাম্বনেইল URL</label><input type="text" id="ep-${n}-thumb" class="form-input" value="${ep.thumb||''}" /></div>
-        <div class="form-group"><label>সময়কাল (মিনিট)</label><input type="number" id="ep-${n}-dur" class="form-input" value="${ep.duration||''}" /></div>
-        <div class="form-group"><label>এপিসোড নম্বর</label><input type="number" id="ep-${n}-num" class="form-input" value="${ep.epNum||n}" /></div>
-      </div>`;
-    document.getElementById('episodesContainer').appendChild(div);
+// ── Content Type ──
+let currentCtype = 'free';
+window.selectCtype = function(type) {
+  currentCtype = type;
+  ['free','rent','subscription'].forEach(t => {
+    document.getElementById('ctype-'+t).classList.remove('selected');
   });
-  if (!eps.length) addEpisodeField();
-  document.getElementById('seriesFormOverlay').style.display = 'flex';
+  document.getElementById('ctype-'+type).classList.add('selected');
+  document.getElementById('f-rent-price').style.display = type === 'rent' ? 'block' : 'none';
+  document.getElementById('f-sub-plan').style.display = type === 'subscription' ? 'block' : 'none';
 };
-
-window.saveSeries = async function() {
-  const title = document.getElementById('sf-title').value.trim();
-  if (!title) { showToast('❌ সিরিজের নাম দিন!', 'error'); return; }
-  const btn = document.getElementById('seriesSaveBtn');
-  btn.disabled = true; btn.textContent = 'সেভ হচ্ছে...';
-
-  // episodes collect
-  const episodes = {};
-  for (let i = 1; i <= episodeCount; i++) {
-    const el = document.getElementById('ep-' + i);
-    if (!el) continue;
-    const epNum = parseInt(document.getElementById('ep-'+i+'-num')?.value) || i;
-    episodes['ep' + epNum] = {
-      epNum,
-      title: document.getElementById('ep-'+i+'-title')?.value || '',
-      url: document.getElementById('ep-'+i+'-url')?.value || '',
-      thumb: document.getElementById('ep-'+i+'-thumb')?.value || '',
-      duration: document.getElementById('ep-'+i+'-dur')?.value || '',
-    };
-  }
-
-  const data = {
-    title,
-    genre: document.getElementById('sf-genre').value,
-    rating: document.getElementById('sf-rating').value,
-    thumb: document.getElementById('sf-thumb').value,
-    desc: document.getElementById('sf-desc').value,
-    status: document.getElementById('sf-status').value,
-    plan: document.getElementById('sf-plan').value,
-    episodes,
-    updatedAt: Date.now(),
-  };
-  if (!editingSeriesId) data.createdAt = Date.now();
-
-  try {
-    const id = editingSeriesId || ('s' + Date.now());
-    await set(ref(db, 'series/' + id), data);
-    showToast('✅ সিরিজ সেভ হয়েছে!', 'success');
-    closeSeriesForm();
-  } catch(e) {
-    showToast('❌ সেভ ব্যর্থ: ' + e.message, 'error');
-  }
-  btn.disabled = false; btn.textContent = '💾 Firebase এ সেভ করুন';
-};
-
-window.deleteSeries = async function(id) {
-  if (!confirm('এই সিরিজ এবং সকল এপিসোড মুছে ফেলবেন?')) return;
-  try {
-    await set(ref(db, 'series/' + id), null);
-    showToast('🗑️ সিরিজ মুছে ফেলা হয়েছে।', 'success');
-  } catch(e) { showToast('❌ মুছতে ব্যর্থ!', 'error'); }
-};
-
-// close overlay on outside click
-document.getElementById('seriesFormOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeSeriesForm();
-});
 
 </script>
 </body>
