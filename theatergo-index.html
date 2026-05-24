@@ -405,19 +405,22 @@ function populateHero() {
 function renderPortrait(id, list) {
   const el = document.getElementById(id);
   if (!el) return;
+  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">No content found</div>'; return; }
   el.innerHTML = list.map(m => {
     const ctype = m.ctype || 'free';
-    const lockBadge = ctype === 'subscription' ? '<div style="position:absolute;top:8px;right:8px;background:rgba(167,139,250,0.9);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;">👑 SUB</div>'
-      : ctype === 'rent' ? `<div style="position:absolute;top:8px;right:8px;background:rgba(245,166,35,0.9);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;">💳 ৳${m.rentPrice||'—'}</div>`
+    const lockBadge = ctype === 'subscription'
+      ? '<div style="position:absolute;top:8px;right:8px;background:rgba(167,139,250,0.9);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;z-index:2;">👑 SUB</div>'
+      : ctype === 'rent'
+      ? `<div style="position:absolute;top:8px;right:8px;background:rgba(245,166,35,0.9);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;z-index:2;">💳 ৳${m.rentPrice||'—'}</div>`
       : '';
-    return `<div class="card-portrait" onclick="playMovie('${m.id}')">
-      <div class="card-thumb" style="background-image:url('${m.thumb||''}')">
+    return `<div class="card-p" onclick="playMovie('${m.id}')">
+      <div class="card-p-img" style="background:${getCardBg(m.genre)}">
+        ${m.thumb?`<img src="${m.thumb}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius)">`:``}
+        <div class="card-overlay"><div class="play-btn-sm"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div></div>
         ${lockBadge}
       </div>
-      <div class="card-info">
-        <div class="card-title">${m.title}</div>
-        <div class="card-meta">${genreNames[m.genre]||m.genre} · ${m.duration||''} · ★${m.rating||''}</div>
-      </div>
+      <div class="card-p-title">${m.title}</div>
+      <div class="card-p-meta">${genreNames[m.genre]||m.genre} · ${m.duration||''} · <span style="color:var(--accent)">★${m.rating||''}</span></div>
     </div>`;
   }).join('');
 }
