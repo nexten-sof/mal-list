@@ -571,8 +571,7 @@ async function playMovie(id) {
   showPage('player');
   document.getElementById('movieTitleBig').textContent = m.title;
   document.getElementById('playerTitleTop').textContent = m.title;
-  document.getElementById('movieDescFull').textContent = m.desc || '';
-  document.getElementById('movieTags').innerHTML = `<span class="tag">${genreNames[m.genre]||m.genre||''}</span><span class="tag">${m.year||''}</span>`;
+  document.getElementById('movieTags').innerHTML = [genreNames[m.genre]||m.genre, m.year, m.duration].map(t=>`<span class="tag">${t||''}</span>`).join('');
   document.getElementById('movieStats').innerHTML = `
     <div class="movie-stat"><span>Rating</span><strong style="color:var(--accent)">★ ${m.rating||'—'}</strong></div>
     <div class="movie-stat"><span>Duration</span><strong>${m.duration||'—'} min</strong></div>
@@ -585,9 +584,9 @@ async function playMovie(id) {
 
   const player = document.getElementById('customPlayer');
   const vid = document.getElementById('mainVideo');
-  const bigBtn = document.getElementById('bigPlayBtn');
   const controls = document.getElementById('playerControls');
   const topBar = document.getElementById('playerTopBar');
+  const bigBtn = document.getElementById('bigPlayBtn');
 
   // পুরনো iframe সরাও
   player.querySelectorAll('iframe.gd-iframe').forEach(f => f.remove());
@@ -598,30 +597,26 @@ async function playMovie(id) {
 
     if (gdMatch) {
       const fileId = gdMatch[1];
-      // Google Drive embed করার সবচেয়ে reliable উপায়
       const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-
-      // video tag লুকাও, iframe দেখাও
       vid.style.display = 'none';
       bigBtn.style.display = 'none';
-      controls.style.display = 'none';
-      topBar.style.display = 'none';
+      controls.style.opacity = '0';
+      controls.style.pointerEvents = 'none';
+      topBar.style.opacity = '0';
 
       const iframe = document.createElement('iframe');
       iframe.className = 'gd-iframe';
       iframe.src = embedUrl;
       iframe.allow = 'autoplay; fullscreen; picture-in-picture';
       iframe.allowFullscreen = true;
-      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;border-radius:12px;z-index:3;';
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;z-index:3;';
       player.appendChild(iframe);
-
     } else {
-      // Normal MP4
-      player.querySelectorAll('iframe.gd-iframe').forEach(f => f.remove());
       vid.style.display = 'block';
       bigBtn.style.display = 'flex';
-      controls.style.display = 'block';
-      topBar.style.display = 'flex';
+      controls.style.opacity = '';
+      controls.style.pointerEvents = '';
+      topBar.style.opacity = '';
       vid.src = url;
       vid.load();
       vid.play().catch(()=>{});
