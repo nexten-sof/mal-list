@@ -18,6 +18,19 @@
   .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--accent);cursor:pointer;}
   .logo span{color:var(--accent2);}
   nav .nav-links{display:flex;gap:24px;align-items:center;}
+  .nav-sub-btn{background:linear-gradient(135deg,#f5a623,#e8420a)!important;color:#000!important;padding:8px 16px!important;border-radius:8px!important;font-weight:700!important;font-size:12px!important;letter-spacing:0.5px!important;transition:opacity 0.2s!important;}
+  .nav-sub-btn:hover{opacity:0.85!important;}
+  .nav-login-btn{background:rgba(255,255,255,0.08)!important;color:var(--text)!important;padding:8px 16px!important;border-radius:8px!important;font-size:12px!important;font-weight:600!important;border:1px solid rgba(255,255,255,0.12)!important;transition:background 0.2s!important;}
+  .nav-login-btn:hover{background:rgba(255,255,255,0.14)!important;}
+  .nav-user{position:relative;}
+  .nav-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f5a623,#e8420a);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#000;cursor:pointer;letter-spacing:0;}
+  .user-menu{display:none;position:absolute;top:48px;right:0;background:#1a1a24;border:1px solid rgba(255,255,255,0.1);border-radius:12px;min-width:180px;padding:8px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+  .user-menu.open{display:block;}
+  .user-menu-name{font-size:14px;font-weight:600;color:#f0f0f0;padding:8px 12px 2px;}
+  .user-menu-plan{font-size:11px;color:#f5a623;padding:0 12px 8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+  .user-menu-divider{height:1px;background:rgba(255,255,255,0.08);margin:4px 0;}
+  .user-menu-item{display:block;padding:10px 12px;font-size:13px;color:#888;cursor:pointer;border-radius:8px;transition:background 0.15s;text-decoration:none;}
+  .user-menu-item:hover{background:rgba(255,255,255,0.06);color:#f0f0f0;}
   nav a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;letter-spacing:1px;text-transform:uppercase;transition:color .2s;cursor:pointer;}
   nav a:hover,nav a.active{color:var(--accent);}
   .btn-admin{background:var(--accent);color:#000;padding:8px 18px;border-radius:6px;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:opacity .2s;}
@@ -136,7 +149,18 @@
     <a onclick="showPage('home');setGenre('action')">Action</a>
     <a onclick="showPage('home');setGenre('drama')">Drama</a>
     <a onclick="showPage('home');setGenre('short')">Short Film</a>
-
+    <a href="theatergo-subscription.html" class="nav-sub-btn">👑 Subscribe</a>
+    <a href="theatergo-login.html" class="nav-login-btn" id="navLoginBtn">Sign In</a>
+    <div class="nav-user" id="navUser" style="display:none;">
+      <div class="nav-avatar" id="navAvatar" onclick="toggleUserMenu()">N</div>
+      <div class="user-menu" id="userMenu">
+        <div class="user-menu-name" id="userMenuName">User</div>
+        <div class="user-menu-plan" id="userMenuPlan">Free Plan</div>
+        <div class="user-menu-divider"></div>
+        <a class="user-menu-item" href="theatergo-subscription.html">👑 Upgrade Plan</a>
+        <div class="user-menu-item" onclick="doSignOut()">🚪 Sign Out</div>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -280,6 +304,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ── Firebase Config ──
 const firebaseConfig = {
@@ -522,6 +547,43 @@ document.getElementById('mainVideo').addEventListener('timeupdate',function(){
   document.getElementById('totalTime').textContent=fmt(this.duration);
 });
 function fmt(s){const m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
+
+// ── Firebase Auth — User State ──
+const auth2 = getAuth();
+const db2 = getDatabase();
+
+onAuthStateChanged(auth2, async (user) => {
+  if (user) {
+    document.getElementById('navLoginBtn').style.display = 'none';
+    document.getElementById('navUser').style.display = 'block';
+    const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+    document.getElementById('navAvatar').textContent = initial;
+    document.getElementById('userMenuName').textContent = user.displayName || user.email;
+    // plan check
+    try {
+      const snap = await get(ref(db2, 'users/' + user.uid + '/plan'));
+      const plan = snap.val() || 'free';
+      document.getElementById('userMenuPlan').textContent =
+        plan === 'premium' ? '👑 Premium' : plan === 'basic' ? '⭐ Basic' : '🆓 Free Plan';
+    } catch(e) {}
+  } else {
+    document.getElementById('navLoginBtn').style.display = 'block';
+    document.getElementById('navUser').style.display = 'none';
+  }
+});
+
+window.toggleUserMenu = function() {
+  document.getElementById('userMenu').classList.toggle('open');
+};
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-user')) {
+    document.getElementById('userMenu')?.classList.remove('open');
+  }
+});
+window.doSignOut = async function() {
+  await signOut(auth2);
+  document.getElementById('userMenu').classList.remove('open');
+};
 
 </script>
 </body>
