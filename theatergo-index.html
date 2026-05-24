@@ -405,16 +405,21 @@ function populateHero() {
 function renderPortrait(id, list) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">No content found</div>'; return; }
-  el.innerHTML = list.map(m => `
-    <div class="card-p" onclick="playMovie('${m.id}')">
-      <div class="card-p-img" style="background:${getCardBg(m.genre)}">
-        ${m.thumb?`<img src="${m.thumb}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius)">`:`<span class="placeholder-icon">${getEmoji(m.genre)}</span>`}
-        <div class="card-overlay"><div class="play-btn-sm"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+  el.innerHTML = list.map(m => {
+    const ctype = m.ctype || 'free';
+    const lockBadge = ctype === 'subscription' ? '<div style="position:absolute;top:8px;right:8px;background:rgba(167,139,250,0.9);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;">👑 SUB</div>'
+      : ctype === 'rent' ? `<div style="position:absolute;top:8px;right:8px;background:rgba(245,166,35,0.9);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;">💳 ৳${m.rentPrice||'—'}</div>`
+      : '';
+    return `<div class="card-portrait" onclick="playMovie('${m.id}')">
+      <div class="card-thumb" style="background-image:url('${m.thumb||''}')">
+        ${lockBadge}
       </div>
-      <div class="card-p-title">${m.title}</div>
-      <div class="card-p-meta">${m.duration} • <span style="color:var(--accent)">★ ${m.rating}</span></div>
-    </div>`).join('');
+      <div class="card-info">
+        <div class="card-title">${m.title}</div>
+        <div class="card-meta">${genreNames[m.genre]||m.genre} · ${m.duration||''} · ★${m.rating||''}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderWide(id, list) {
@@ -447,6 +452,45 @@ let currentMovieId = null;
 async function playMovie(id) {
   const m = allMovies.find(x => x.id === id);
   if (!m) return;
+
+  // ── Content Type Check ──
+  const ctype = m.ctype || 'free';
+
+  if (ctype === 'subscription' || ctype === 'rent') {
+    // user login আছে কিনা check
+    const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const { getDatabase, ref: dbRef, get } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+    const authInst = getAuth();
+    const user = authInst.currentUser;
+
+    if (!user) {
+      showAccessModal(m, ctype);
+      return;
+    }
+
+    if (ctype === 'subscription') {
+      // plan check
+      const dbInst = getDatabase();
+      const snap = await get(dbRef(dbInst, `users/${user.uid}`));
+      const userData = snap.val() || {};
+      const plan = userData.plan || 'free';
+      const expiry = userData.planExpiry || 0;
+      const isActive = (plan === 'basic' || plan === 'premium') && Date.now() < expiry;
+      const subPlan = m.subPlan || 'basic';
+
+      if (!isActive) { showAccessModal(m, 'subscription'); return; }
+      if (subPlan === 'premium' && plan !== 'premium') { showAccessModal(m, 'premium_only'); return; }
+    }
+
+    if (ctype === 'rent') {
+      // rent purchase check
+      const dbInst = getDatabase();
+      const snap = await get(dbRef(dbInst, `users/${user.uid}/rentedMovies/${id}`));
+      if (!snap.exists()) { showAccessModal(m, 'rent'); return; }
+    }
+  }
+
+  // ── Play ──
   showPage('player');
   document.getElementById('movieTitleBig').textContent = m.title;
   document.getElementById('movieTags').innerHTML = [genreNames[m.genre]||m.genre, m.year, m.duration].map(t=>`<span class="tag">${t||''}</span>`).join('');
@@ -462,18 +506,14 @@ async function playMovie(id) {
 
   const vbox = document.getElementById('videoBox');
   vbox.innerHTML = '';
-
   if (m.url) {
     const url = m.url.trim();
     const gdMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
-
     if (gdMatch) {
-      const embedUrl = `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
-      vbox.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      vbox.innerHTML = `<iframe src="https://drive.google.com/file/d/${gdMatch[1]}/preview" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     } else if (ytMatch) {
-      const embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
-      vbox.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      vbox.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     } else {
       vbox.innerHTML = `<video src="${url}" controls autoplay style="width:100%;height:100%;"></video>`;
     }
@@ -482,6 +522,51 @@ async function playMovie(id) {
   }
 }
 window.playMovie = playMovie;
+
+// ── Access Modal ──
+function showAccessModal(m, type) {
+  const existing = document.getElementById('accessModal');
+  if (existing) existing.remove();
+
+  let title, msg, btnText, btnLink;
+  if (type === 'rent') {
+    title = '💳 Rent Required';
+    msg = `"${m.title}" দেখতে ৳${m.rentPrice||'—'} দিয়ে rent করতে হবে।`;
+    btnText = 'Rent Now';
+    btnLink = 'theatergo-subscription.html';
+  } else if (type === 'premium_only') {
+    title = '👑 Premium Only';
+    msg = `"${m.title}" শুধুমাত্র Premium subscribers দেখতে পারবেন।`;
+    btnText = 'Upgrade to Premium';
+    btnLink = 'theatergo-subscription.html';
+  } else if (type === 'subscription') {
+    title = '⭐ Subscription Required';
+    msg = `"${m.title}" দেখতে Basic বা Premium plan subscribe করুন।`;
+    btnText = 'Subscribe Now';
+    btnLink = 'theatergo-subscription.html';
+  } else {
+    title = '🔐 Sign In Required';
+    msg = 'এই content দেখতে Sign In করুন।';
+    btnText = 'Sign In';
+    btnLink = 'theatergo-login.html';
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'accessModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);';
+  modal.innerHTML = `
+    <div style="background:#111118;border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:100%;max-width:380px;padding:32px;text-align:center;animation:modalIn 0.25s ease;">
+      <div style="font-size:52px;margin-bottom:16px;">${type==='rent'?'💳':type==='premium_only'?'👑':'⭐'}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:8px;">${title}</div>
+      <div style="font-size:14px;color:#888;line-height:1.6;margin-bottom:24px;">${msg}</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('accessModal').remove()" style="flex:1;background:rgba(255,255,255,0.06);color:#888;border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+        <button onclick="window.location.href='${btnLink}'" style="flex:2;background:linear-gradient(135deg,#f5a623,#e8420a);color:#000;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">${btnText} →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
 
 
 // ── Firebase Auth — User State ──
