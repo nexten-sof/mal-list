@@ -546,7 +546,7 @@ function renderPayments() {
         </div>
         <div style="text-align:center;">
           <div style="font-size:18px;font-weight:800;color:#f5a623;">৳${p.amount}</div>
-          <div style="font-size:11px;color:#888;">${p.plan==='basic'?'⭐ Basic':'👑 Premium'}</div>
+          <div style="font-size:11px;color:#888;">${p.type==='rent'?`🎬 Rent: ${p.movieTitle||''}`:p.plan==='basic'?'⭐ Basic':'👑 Premium'}</div>
         </div>
         <div>
           <div style="font-size:12px;color:#888;">bKash: <span style="color:#e2136e;font-weight:700;">${p.userBkash}</span></div>
@@ -557,7 +557,7 @@ function renderPayments() {
           <span style="font-size:12px;font-weight:700;color:${statusColor};">${statusText}</span>
           ${p.status==='pending'?`
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-sm" style="background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.25);" onclick="approvePayment('${p.key}','${p.userId}','${p.plan}')">✅ Approve</button>
+            <button class="btn btn-sm" style="background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.25);" onclick="approvePayment('${p.key}','${p.userId}','${p.plan}','${p.type||'subscription'}','${p.movieId||''}')">✅ Approve</button>
             <button class="btn btn-sm" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);" onclick="rejectPayment('${p.key}')">❌ Reject</button>
           </div>`:''}
         </div>
@@ -573,18 +573,26 @@ window.filterPayments = function(filter, el) {
   renderPayments();
 };
 
-window.approvePayment = async function(key, userId, plan) {
-  if (!confirm('এই payment approve করবেন? User এর plan activate হবে।')) return;
+window.approvePayment = async function(key, userId, plan, type, movieId) {
+  if (!confirm('এই payment approve করবেন?')) return;
   try {
-    // payment status update
     await set(ref(db, `paymentRequests/${key}/status`), 'approved');
     await set(ref(db, `paymentRequests/${key}/approvedAt`), Date.now());
-    // user plan update
-    const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
-    await set(ref(db, `users/${userId}/plan`), plan);
-    await set(ref(db, `users/${userId}/planExpiry`), expiry);
-    await set(ref(db, `users/${userId}/planActivatedAt`), Date.now());
-    showToast('✅ Payment approved! User plan activated.', 'success');
+
+    if (type === 'rent' && movieId) {
+      // Rent — user এর rentedMovies এ যোগ করো
+      await set(ref(db, `users/${userId}/rentedMovies/${movieId}`), {
+        rentedAt: Date.now(),
+        permanent: true
+      });
+    } else {
+      // Subscription
+      const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+      await set(ref(db, `users/${userId}/plan`), plan);
+      await set(ref(db, `users/${userId}/planExpiry`), expiry);
+      await set(ref(db, `users/${userId}/planActivatedAt`), Date.now());
+    }
+    showToast('✅ Approved! Access granted.', 'success');
   } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
 };
 
